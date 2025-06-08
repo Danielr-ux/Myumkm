@@ -65,7 +65,7 @@ class ProdukResource extends Resource
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),
-
+                
                 Grid::make(2)
                     ->schema([
                         Repeater::make('detailProduks')
@@ -82,7 +82,24 @@ class ProdukResource extends Resource
                             ->relationship()
                             ->schema([
                                 FileUpload::make('gambar')->required(),
-                                Toggle::make('is_primary')->label('Gambar Utama'),
+                                Toggle::make('is_primary')
+                                    ->label('Gambar Utama')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $set, $get, $livewire) {
+                                        if ($state) {
+                                            // Ambil semua data produkGambars
+                                            $allItems = $get('../../produkGambars') ?? [];
+                                            
+                                            // Loop dan matikan semua is_primary kecuali yang sedang diaktifkan
+                                            foreach ($allItems as $index => $item) {
+                                                $currentPath = $get('../..');
+                                                $set("../../produkGambars.{$index}.is_primary", false);
+                                            }
+                                            
+                                            // Set kembali item yang diklik jadi true
+                                            $set('is_primary', true);
+                                        }
+                                    }),
                                 TextInput::make('urutan')->numeric(),
                             ])
                             ->collapsible(),
